@@ -931,7 +931,7 @@ def multilinear_avg_spec (F : ι → (ι → ℝ) → ℝ) (t : NNReal): (ι →
   multilinear_avg (Set.indicator (Ico 0 1) 1) F t
 
 /-Version for ℤ:-/
-def discrete_avg' (n : ℕ) (F : ι → (ι → ℤ) → ℝ) (k : (ι → ℤ)): ℝ :=
+def discrete_avg (n : ℕ) (F : ι → (ι → ℤ) → ℝ) (k : (ι → ℤ)): ℝ :=
   1 /n * ∑ i ∈ Finset.range n, ∏(j : ι), (F j) (k + (unit j (↑i : ℤ)))
 
 lemma get_rid{n : ℕ} (i : Fin n): (↑i : ℕ) < n + 1 := by
@@ -1166,9 +1166,9 @@ theorem fact5_2 {g : ℕ → NNReal} {q : ι → ℝ} (h : good g q) (m : ℕ) (
     ≤ (good_const h) * g m * ∏ (i : ι), (∫⁻ (a : ι → ℝ), ‖(F i) a‖ₑ ^ (↑(q i) : ℝ)) ^ (1 / (↑(q i) : ℝ)) :=
     good_const_good h m idx mon hidx hidx' F hF
 
-theorem fact5_3' (F : ι → (ι → ℤ) → ℝ) (k : ι → ℤ): discrete_avg' n F k = 1 /n * ∑ i ∈ Finset.Ico (∑ (j : ι), k j) (n+ ∑ (j : ι), k j),
+theorem fact5_3' (F : ι → (ι → ℤ) → ℝ) (k : ι → ℤ): discrete_avg n F k = 1 /n * ∑ i ∈ Finset.Ico (∑ (j : ι), k j) (n+ ∑ (j : ι), k j),
   ∏(j_1 : ι), (F j_1) (k + unit j_1 (i - ∑ (r : ι), k r)):= by
-    unfold discrete_avg'
+    unfold discrete_avg
     simp
     left
     set f : ℤ → ℝ := fun i ↦ ∏ j, F j (k + unit j i)
@@ -2272,12 +2272,12 @@ lemma finset_sum_of_nonneg_le_two_mul_union {α : Type*} {s u : Finset α} {f : 
 theorem multilinear_avg_spec_discrete_avg_est_c_big
     [Nonempty ι] (k : ι → ℤ) (α : ι → ℝ) (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1)
     (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (h : n < Fintype.card ι):
-    |(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k| ≤
+    |(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k| ≤
     2 / n * ∑ i ∈ Finset.Ico 0 (↑(Fintype.card ι) : ℤ) ∪ Finset.Icc (↑n) (Fintype.card ι + (↑n : ℤ)),
     |∏ j_1, F j_1 (k + unit j_1 (i + ∑ r, k r - ∑ r, k r))| := by
   by_cases hn : n = 0
   · rw [hn]
-    unfold discrete_avg' multilinear_avg_spec multilinear_avg
+    unfold discrete_avg multilinear_avg_spec multilinear_avg
     simp
   have hn' : 0 < (↑n : NNReal) := by
     simp
@@ -2508,11 +2508,11 @@ set_option maxHeartbeats 300000 in
 --i wish it wasnt necessary
 theorem multilinear_avg_spec_discrete_avg_est
     [Nonempty ι] (k : ι → ℤ) (α : ι → ℝ) (hα : ∀ i : ι, 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ):
-    |(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k| ≤
+    |(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k| ≤
     2/n * ∑ i ∈ Finset.Ico 0 (↑(Fintype.card ι) : ℤ) ∪ Finset.Icc (↑n) (Fintype.card ι + (↑n : ℤ)), |∏ j_1, F j_1 (k + unit j_1 (i + ∑ r, k r - ∑ r, k r))| := by
   by_cases hn : n = 0
   · rw [hn]
-    unfold discrete_avg' multilinear_avg_spec multilinear_avg
+    unfold discrete_avg multilinear_avg_spec multilinear_avg
     simp
   have hn' : 0 < (↑n : NNReal) := by
     simp
@@ -3258,7 +3258,7 @@ lemma enorm_le_enorm {a b : ℝ} (ha : 0 ≤ a) (h : a ≤ b): ‖a‖ₑ ≤ �
 
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2):
-  ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2
+  ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2
     ≤ ((64*(Fintype.card ι)^2) / (↑n^2 : NNReal))* ∑ j_1, ∑' k : ι → ℤ, ‖F j_1 k‖ₑ^(q j_1) := by
     let C := 2*Fintype.card ι
     let M := Finset.Ico 0 (↑(Fintype.card ι) : ℤ) ∪ Finset.Icc (↑n) (Fintype.card ι + (↑n : ℤ))
@@ -3266,13 +3266,13 @@ theorem multilinear_avg_approx_sum_discrete_avg_ell_two [Nonempty ι] {α : ι �
     swap
     · simp only [not_lt, nonpos_iff_eq_zero] at n0
       rw [n0]
-      unfold discrete_avg' approx_sum_mul approx_sum multilinear_avg_spec multilinear_avg
+      unfold discrete_avg approx_sum_mul approx_sum multilinear_avg_spec multilinear_avg
       simp only [CharP.cast_eq_zero, NNReal.coe_zero, _root_.div_zero, zero_mul, mem_Ico, le_refl,
         zero_lt_one, and_self, indicator_of_mem, Pi.one_apply, one_mul, Finset.range_zero,
         Finset.sum_empty, mul_zero, sub_self, enorm_zero, ne_eq, OfNat.ofNat_ne_zero,
         not_false_eq_true, zero_pow, tsum_zero, ENNReal.coe_zero, zero_le]
     calc
-          ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2
+          ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2
       _ ≤ ∑' k : ι → ℤ, ‖2/n * ∑ i ∈ M, |∏ j_1, F j_1 (k + unit j_1 (i + ∑ r, k r - ∑ r, k r))|‖ₑ^2 := by
         gcongr with k
         nth_rw 1[← Real.enorm_abs]
@@ -3514,7 +3514,7 @@ theorem multilinear_avg_approx_sum_discrete_avg_ell_two [Nonempty ι] {α : ι �
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
   (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
-  ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2
+  ∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2
     ≤ ((64*(Fintype.card ι)^3) / (↑n^2 : NNReal)) := by
   have og := multilinear_avg_approx_sum_discrete_avg_ell_two hα F n hq
   suffices : ((64*(Fintype.card ι)^2) / (↑n^2 : NNReal))* ∑ j_1, ∑' k : ι → ℤ, ‖F j_1 k‖ₑ^(q j_1) =
@@ -3538,7 +3538,7 @@ theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one [Nonempty ι] 
 
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two' [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2):
-  (∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2)^((2 : ℝ)⁻¹)
+  (∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2)^((2 : ℝ)⁻¹)
     ≤ ((8*(Fintype.card ι)) / (↑n : NNReal))* (∑ j_1, ∑' k : ι → ℤ, ‖F j_1 k‖ₑ^(q j_1))^((2 : ℝ)⁻¹) := by
   suffices : ((8*(Fintype.card ι)) / (↑n : NNReal))* (∑ j_1, ∑' k : ι → ℤ, ‖F j_1 k‖ₑ^(q j_1))^((2 : ℝ)⁻¹) =
     (((64*(Fintype.card ι)^2) / (↑n^2 : NNReal))* ∑ j_1, ∑' k : ι → ℤ, ‖F j_1 k‖ₑ^(q j_1))^(2 : ℝ)⁻¹
@@ -3578,7 +3578,7 @@ lemma ennreal_rpow_inv {a b : ℝ≥0∞} {z : ℝ} (hz : z ≠ 0) (h : a^ z = b
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one' [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
   (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
-  (∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2) ^ (1 / (2 : ℝ))
+  (∑' k : ι → ℤ, ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2) ^ (1 / (2 : ℝ))
     ≤ ((8*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑n : NNReal))) := by
   suffices : ((8*(Fintype.card ι) ^ (3 / (2 : ℝ)) / ((↑(↑n : NNReal)) : ℝ≥0∞))) = (((64*(Fintype.card ι)^3) / (↑n^2 : NNReal))) ^ (1 / (2 : ℝ))
   · rw [this]
@@ -3768,12 +3768,12 @@ lemma ell_two_triangle {α : Type*} (f g : α → ℝ):
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one'' [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
   (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
-  ell_two (fun k ↦ (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k)
+  ell_two (fun k ↦ (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k)
     ≤ ((8*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑n : NNReal))) := by
   suffices : ell_two (fun k ↦
-    (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k) =
+    (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k) =
     (∑' k : ι → ℤ,
-    ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg' n F k‖ₑ^2) ^ (1 / (2 : ℝ))
+    ‖(multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j)) - discrete_avg n F k‖ₑ^2) ^ (1 / (2 : ℝ))
   · rw [this]
     exact multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one' hα F n hq hF
   unfold ell_two
@@ -3783,7 +3783,7 @@ theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one'' [Nonempty ι
 theorem multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one''' [Nonempty ι] {α : ι → ℝ} {q : ι → ℝ}
   (hα : ∀ (i : ι), 0 ≤ α i ∧ α i < 1) (F : ι → (ι → ℤ) → ℝ) (n : ℕ) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
   (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
-  ell_two ((fun k ↦ (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j))) - (fun k ↦ discrete_avg' n F k))
+  ell_two ((fun k ↦ (multilinear_avg_spec (approx_sum_mul F) ↑n (fun j ↦ k j + α j))) - (fun k ↦ discrete_avg n F k))
     ≤ ((8*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑n : NNReal))) := by
   apply le_trans (multilinear_avg_approx_sum_discrete_avg_ell_two_norms_one'' hα F n hq hF)
   rfl
@@ -4219,14 +4219,14 @@ theorem multilinear_avg_approx_edist [Nonempty ι] {α : ι → ℝ} {q : ι →
     edist (ell_two ((fun (k : ι → ℤ) ↦
     (multilinear_avg_spec (approx_sum_mul F) ↑(idx i.succ) (fun j ↦ k j + α j))) -
     (fun (k : ι → ℤ) ↦ (multilinear_avg_spec (approx_sum_mul F) ↑(idx ⟨i, get_rid i⟩) (fun j ↦ k j + α j)))))
-    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg' (idx i.succ) F k) - (fun (k : ι → ℤ) ↦ discrete_avg' (idx ⟨i, get_rid i⟩) F k)))
+    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg (idx i.succ) F k) - (fun (k : ι → ℤ) ↦ discrete_avg (idx ⟨i, get_rid i⟩) F k)))
     ≤ ((16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : NNReal))) := by
   set K := 8 * (↑(Fintype.card ι) : ℝ≥0∞) ^ (3 / (2 : ℝ))
   set a := (fun (k : ι → ℤ) ↦
     (multilinear_avg_spec (approx_sum_mul F) ↑(idx i.succ) (fun j ↦ k j + α j)))
   set b := (fun (k : ι → ℤ) ↦ (multilinear_avg_spec (approx_sum_mul F) ↑(idx ⟨i, get_rid i⟩) (fun j ↦ k j + α j)))
-  set c := (fun (k : ι → ℤ) ↦ discrete_avg' (idx i.succ) F k)
-  set d := (fun (k : ι → ℤ) ↦ discrete_avg' (idx ⟨i, get_rid i⟩) F k)
+  set c := (fun (k : ι → ℤ) ↦ discrete_avg (idx i.succ) F k)
+  set d := (fun (k : ι → ℤ) ↦ discrete_avg (idx ⟨i, get_rid i⟩) F k)
   let n := (↑(idx ⟨i, get_rid i⟩) : NNReal)
   calc
     edist (ell_two (a - b)) (ell_two (c - d))
@@ -4256,7 +4256,7 @@ theorem multilinear_avg_approx_edist_udiff' [Nonempty ι] {α : ι → ℝ} {q :
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (i : Fin m)
     (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
     edist (ell_two (fun (k : ι → ℤ) ↦ ((u_diff m F idx i) (fun j ↦ (↑(k j) : ℝ) + α j))))
-    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg' (idx i.succ) F k) - (fun (k : ι → ℤ) ↦ discrete_avg' (idx ⟨i, get_rid i⟩) F k)))
+    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg (idx i.succ) F k) - (fun (k : ι → ℤ) ↦ discrete_avg (idx ⟨i, get_rid i⟩) F k)))
     ≤ ((16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : NNReal))) := by
   exact multilinear_avg_approx_edist hα F m hq idx mon i hF
 
@@ -4273,11 +4273,11 @@ theorem multilinear_avg_approx_edist_udiff
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (i : Fin m)
     (hF : ∀ i : ι, ∑' k : ι → ℤ, ‖F i k‖ₑ^(q i) = 1):
     edist ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^((1 : ℝ) / (2 : ℝ)))
-    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg' (idx i.succ) F k) -
-    (fun (k : ι → ℤ) ↦ discrete_avg' (idx ⟨i, get_rid i⟩) F k)))
+    (ell_two ((fun (k : ι → ℤ) ↦ discrete_avg (idx i.succ) F k) -
+    (fun (k : ι → ℤ) ↦ discrete_avg (idx ⟨i, get_rid i⟩) F k)))
     ≤ (16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : NNReal)) := by
-  set h := (fun (k : ι → ℤ) ↦ discrete_avg' (idx i.succ) F k) -
-    (fun (k : ι → ℤ) ↦ discrete_avg' (idx ⟨i, get_rid i⟩) F k)
+  set h := (fun (k : ι → ℤ) ↦ discrete_avg (idx i.succ) F k) -
+    (fun (k : ι → ℤ) ↦ discrete_avg (idx ⟨i, get_rid i⟩) F k)
   set K := 16*(↑(Fintype.card ι) : ℝ≥0∞) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : NNReal)
   calc
     edist ((∫⁻ (x : ι → ℝ), ‖u_diff m F idx i x ^ (2 : ℝ)‖ₑ) ^ (1 / (2 : ℝ))) (ell_two h)
@@ -4362,7 +4362,7 @@ theorem discrete_ver'_norm_one_individual_preadd {g : ℕ → NNReal} {q : ι �
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1) (i : Fin m):
     |((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal -
-    (∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)|
+    (∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)|
     ≤ 16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / ↑(idx ⟨i, get_rid i⟩) := by
   refine (ofReal_le_ofReal_iff ?_).mp ?_
   · apply div_nonneg <;> simp
@@ -4445,7 +4445,7 @@ theorem discrete_ver'_norm_one_individual_preadd {g : ℕ → NNReal} {q : ι �
         · apply abs_nonneg
         exact le_of_lt (hq.1 j)
   refine lt_top_iff_ne_top.mp ?_
-  set p := ell_two ((fun k ↦ discrete_avg' (idx i.succ) F k) - fun k ↦ discrete_avg' (idx ⟨↑i, get_rid i⟩) F k)
+  set p := ell_two ((fun k ↦ discrete_avg (idx i.succ) F k) - fun k ↦ discrete_avg (idx ⟨↑i, get_rid i⟩) F k)
   set q := (∫⁻ (x : ι → ℝ), ‖u_diff m F idx i x ^ (2 : ℝ)‖ₑ) ^ (1 / (2 : ℝ))
   by_contra h0
   simp at h0
@@ -4474,10 +4474,10 @@ theorem discrete_ver'_norm_one_individual_add {g : ℕ → NNReal} {q : ι → �
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1) (i : Fin m):
-    (∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)
+    (∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)
     ≤ 16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / ↑(idx ⟨i, get_rid i⟩) + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal := by
   have := discrete_ver'_norm_one_individual_preadd hg hq m idx mon hidx hidx' F hF hF' i
-  set a := (∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)
+  set a := (∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2)^(2⁻¹ : ℝ)
   set b := 16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : ℝ)
   set c := ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal
   refine (OrderedSub.tsub_le_iff_right a (↑c) b).mp ?_
@@ -4492,10 +4492,10 @@ theorem discrete_ver'_norm_one_individual_add_sq
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1) (i : Fin m):
-    (∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2)
+    (∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2)
     ≤ (16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / ↑(idx ⟨i, get_rid i⟩) + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal)^2 := by
   set b := (16*(Fintype.card ι) ^ (3 / (2 : ℝ)) / (↑(idx ⟨i, get_rid i⟩) : ℝ) + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal)
-  set a := (∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2)
+  set a := (∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2)
   calc
     a = (a ^ (2⁻¹ : ℝ)) ^ (2 : ℕ) := by
       rw [← Real.rpow_two, ← Real.rpow_mul]
@@ -4515,7 +4515,7 @@ theorem discrete_ver'_norm_one_part_one {g : ℕ → NNReal} {q : ι → ℝ} (h
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1):
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2
     ≤ 2 * ∑ i : Fin m, (4 * (8*(↑(Fintype.card ι) : ℝ) ^ (3 / (2 : ℝ))) ^ 2 / (↑(idx ⟨i, get_rid i⟩) : ℝ≥0)^2 + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ).toReal)) := by
   by_cases hm : m = 0
   · have : IsEmpty (Fin m) := by
@@ -4525,7 +4525,7 @@ theorem discrete_ver'_norm_one_part_one {g : ℕ → NNReal} {q : ι → ℝ} (h
       enorm_pow, mul_zero, le_refl]
   set K := 8*(↑(Fintype.card ι) : ℝ) ^ (3 / (2 : ℝ)) --falsch, we did 2 * (64*(Fintype.card ι)^3) -> 16*(Fintype.card ι) ^ (3 / (2 : ℝ)), also war K = (64*(Fintype.card ι)^3)
   calc
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2
     _ ≤ ∑ i : Fin m, (↑((2 * K / ↑(idx ⟨i, get_rid i⟩) + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ)^(2 : ℝ)⁻¹).toNNReal)^(2 : ℝ)) : ℝ) := by
       gcongr with i
       have := discrete_ver'_norm_one_individual_add_sq hg hq m idx mon hidx hidx' F hF hF' i
@@ -4566,7 +4566,7 @@ theorem discrete_ver'_norm_one_part_two {g : ℕ → NNReal} {q : ι → ℝ} (h
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1):
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2
     ≤ (8 * (8*(↑(Fintype.card ι) : ℝ) ^ (3 / (2 : ℝ))) ^ 2 * (π^2 / 6)) + 2 * (∑ i : Fin m, ∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)‖ₑ^(2 : ℝ)).toNNReal := by
   by_cases hm : m = 0
   · have : IsEmpty (Fin m) := by
@@ -4583,7 +4583,7 @@ theorem discrete_ver'_norm_one_part_two {g : ℕ → NNReal} {q : ι → ℝ} (h
     norm_num
   set K := 8*(↑(Fintype.card ι) : ℝ) ^ (3 / (2 : ℝ))
   calc
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2
       ≤ 2 * ∑ i : Fin m, (4 * K ^ 2 / (↑(idx ⟨i, get_rid i⟩) : ℝ≥0)^2 + ((∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ).toReal)) := by
       exact discrete_ver'_norm_one_part_one hg hq m idx mon hidx hidx' F hF hF'
     _ = 8 * K ^ 2 * ∑ i : Fin m, (1 / (↑(idx ⟨i, get_rid i⟩))^2) + 2 * ∑ i : Fin m, (∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)^(2 : ℝ)‖ₑ).toReal := by
@@ -4638,7 +4638,7 @@ theorem discrete_ver'_norm_one {g : ℕ → NNReal} {q : ι → ℝ} (hg : good 
     (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal)
     (hF' : ∀ (j : ι), ∑' a : ι → ℤ, |(F j a)| ^ (q j) = 1): --(hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal) unnötig i think, da 0 *  ⊤ = 0 NVM
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
     (((256 * (Fintype.card ι)^3 * π ^2) / 3) + 2*(good_const hg)) * g m := by
   by_cases hm : m = 0
   · have : IsEmpty (Fin m) := by
@@ -4648,7 +4648,7 @@ theorem discrete_ver'_norm_one {g : ℕ → NNReal} {q : ι → ℝ} (hg : good 
     exact gz hg m
   set K := 8*(↑(Fintype.card ι) : ℝ) ^ (3 / (2 : ℝ)) --falsch
   calc
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2
       ≤ (8 * K ^ 2 * (π^2 / 6)) + 2 * (∑ i : Fin m, ∫⁻ x : ι → ℝ, ‖(u_diff m F idx i x)‖ₑ^(2 : ℝ)).toNNReal := by
       apply trick_lemma (discrete_ver'_norm_one_part_two hg hq m idx mon hidx hidx' F hF hF')
       unfold K
@@ -4762,8 +4762,8 @@ lemma tsum_eq_zero {α : Type*} {f : α → ℝ} (hf : f = 0) : ∑' a, f a = 0 
 
 omit [Nonempty ι] in
 lemma discrete'_avg_mul (n : ℕ) (F : ι → (ι → ℤ) → ℝ) (c : ι → ℝ) (a : ι → ℤ) :
-    discrete_avg' n (fun i k ↦ ((c i) * F i k)) a = (∏ i, c i) * discrete_avg' n F a := by
-  unfold discrete_avg'
+    discrete_avg n (fun i k ↦ ((c i) * F i k)) a = (∏ i, c i) * discrete_avg n F a := by
+  unfold discrete_avg
   rw [← mul_assoc, mul_comm (∏ i, c i), mul_assoc]
   congr
   rw [Finset.mul_sum]
@@ -4773,10 +4773,10 @@ lemma discrete'_avg_mul (n : ℕ) (F : ι → (ι → ℤ) → ℝ) (c : ι → 
 
 omit [Nonempty ι] in
 theorem mul_corollary (m : ℕ) (idx : Fin (m + 1) → ℕ) (F : ι → (ι → ℤ) → ℝ) (c : ι → ℝ):
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) (fun i k ↦ ((c i) * F i k)) a -
-    discrete_avg' (idx ⟨i, get_rid i⟩) (fun i k ↦ ((c i) * F i k)) a)^2 =
-    (∏ i, (c i)^2) * ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a -
-    discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2 := by
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) (fun i k ↦ ((c i) * F i k)) a -
+    discrete_avg (idx ⟨i, get_rid i⟩) (fun i k ↦ ((c i) * F i k)) a)^2 =
+    (∏ i, (c i)^2) * ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a -
+    discrete_avg (idx ⟨i, get_rid i⟩) F a)^2 := by
   rw [Finset.mul_sum]
   congr
   ext i
@@ -4902,8 +4902,8 @@ theorem normalised_discrete_mul {F : (ι → ℤ) → ℝ} {q : ℝ} (h : 0 < �
 omit [Nonempty ι] in
 lemma normalised_discrete_discrete'_avg_mul
     (n : ℕ) (q : ι → ℝ) (F : ι → (ι → ℤ) → ℝ) (a : ι → ℤ) (h : ∀ i,  0 < ∑' a, |F i a|^ q i):
-    discrete_avg' n (fun i k ↦ ((∑' a, |F i a|^ q i) ^ ((q i)⁻¹) *
-    normalised_discrete (F i) (q i) k)) a = discrete_avg' n F a := by
+    discrete_avg n (fun i k ↦ ((∑' a, |F i a|^ q i) ^ ((q i)⁻¹) *
+    normalised_discrete (F i) (q i) k)) a = discrete_avg n F a := by
   congr
   ext i
   rename_i k
@@ -4913,7 +4913,7 @@ omit [Nonempty ι] in
 lemma normalised_discrete_discrete'_avg_mul'
     (n : ℕ) (q : ι → ℝ) (F : ι → (ι → ℤ) → ℝ) (a : ι → ℤ) (h : ∀ i,  0 < ∑' a, |F i a|^ q i):
     (∏ i, (∑' a, |F i a|^ q i) ^ ((q i)⁻¹)) *
-    discrete_avg' n (fun i k ↦ normalised_discrete (F i) (q i) k) a = discrete_avg' n F a := by
+    discrete_avg n (fun i k ↦ normalised_discrete (F i) (q i) k) a = discrete_avg n F a := by
   rw [← normalised_discrete_discrete'_avg_mul n q F a h, discrete'_avg_mul]
 
 omit [Fintype ι] [Nonempty ι] in
@@ -4925,7 +4925,7 @@ theorem normalised_discrete_memℓp {F : (ι → ℤ) → ℝ} (q : ℝ) {p : �
 theorem discrete_ver' {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
     (m : ℕ) (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
     (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal): --(hF : ∀ (j : ι), Memℓp (F j) (q j).toNNReal) unnötig i think, da 0 *  ⊤ = 0 NVM
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
     (((256 * (Fintype.card ι)^3 * π ^2) / 3) + 2*(good_const hg)) * g m * ∏ (j : ι), (∑' a : ι → ℤ, |(F j a)| ^ (q j))^(2/ (q j)) := by
   by_cases hm : m = 0
   · have : IsEmpty (Fin m) := by
@@ -4966,10 +4966,10 @@ theorem discrete_ver' {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq 
     apply tsum_eq_zero
     ext a
     simp
-    suffices (n : ℕ): discrete_avg' n F a = 0
+    suffices (n : ℕ): discrete_avg n F a = 0
     · rw [this, this]
       simp only [sub_self]
-    unfold discrete_avg'
+    unfold discrete_avg
     apply mul_eq_zero.2
     right
     apply Finset.sum_eq_zero
@@ -4985,10 +4985,10 @@ theorem discrete_ver' {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq 
   let p := (∏ i, (∑' a, |F i a|^ q i) ^ ((q i)⁻¹))
   calc
     ∑ i : Fin m, ∑' (a : ι → ℤ),
-    (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨↑i, get_rid i⟩) F a) ^ 2
-      = ∑ i : Fin m, ∑' (a : ι → ℤ), ((p * discrete_avg' (idx i.succ)
+    (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨↑i, get_rid i⟩) F a) ^ 2
+      = ∑ i : Fin m, ∑' (a : ι → ℤ), ((p * discrete_avg (idx i.succ)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)
-        - (p * discrete_avg' (idx ⟨↑i, get_rid i⟩)
+        - (p * discrete_avg (idx ⟨↑i, get_rid i⟩)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)) ^ 2 := by
       congr
       ext i
@@ -4997,16 +4997,16 @@ theorem discrete_ver' {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq 
       unfold p
       rw [normalised_discrete_discrete'_avg_mul' (h := po),
         normalised_discrete_discrete'_avg_mul' (h := po)]
-    _ = ∑ i : Fin m, ∑' (a : ι → ℤ), (p^2 * ((discrete_avg' (idx i.succ)
+    _ = ∑ i : Fin m, ∑' (a : ι → ℤ), (p^2 * ((discrete_avg (idx i.succ)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)
-        - (discrete_avg' (idx ⟨↑i, get_rid i⟩)
+        - (discrete_avg (idx ⟨↑i, get_rid i⟩)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)) ^ 2) := by
       congr
       ext i
       ring_nf
-    _ = p^2 * ∑ i : Fin m, ∑' (a : ι → ℤ), (((discrete_avg' (idx i.succ)
+    _ = p^2 * ∑ i : Fin m, ∑' (a : ι → ℤ), (((discrete_avg (idx i.succ)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)
-        - (discrete_avg' (idx ⟨↑i, get_rid i⟩)
+        - (discrete_avg (idx ⟨↑i, get_rid i⟩)
         (fun i k ↦ normalised_discrete (F i) (q i) k) a)) ^ 2) := by
       rw [Finset.mul_sum]
       congr
@@ -5098,9 +5098,9 @@ variable {X : Type*} (f : ι → X → ℝ) {S : ι → X → X} (N : ℕ)
 
 omit [Nonempty ι]
 theorem fact5_5 (hS : pairwise_commuting S) (k : ι → ℤ) (hk : 0 ≤ k) (hN : ∀ (i : ι), (k i + n) < 2 * N) (x : X):
-  ergodic_avg n S f (iterate S (fun i ↦ (k i).toNat) x) = discrete_avg' n ((push_forward_many N S f) x) k := by
+  ergodic_avg n S f (iterate S (fun i ↦ (k i).toNat) x) = discrete_avg n ((push_forward_many N S f) x) k := by
     unfold ergodic_avg nergodic_avg
-    unfold discrete_avg'
+    unfold discrete_avg
     simp
     left
     apply Finset.sum_congr
@@ -5217,7 +5217,7 @@ instance bound_set_finite : Finite (bound_set (ι := ι) N) := by
 theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_commuting S) (hS' : MMeasurePreserving μ S)
     (hN : a ≤ N ∧ b ≤ N) (hf : ∀ (i : ι), Measurable (f i)):
     ∫⁻ (x : X), ‖(ergodic_avg a S f x - ergodic_avg b S f x)‖ₑ ^ 2 ∂μ ≤
-    1 / N ^(Fintype.card ι) * ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg' a ((push_forward_many N S f) x) k - discrete_avg' b ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
+    1 / N ^(Fintype.card ι) * ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg a ((push_forward_many N S f) x) k - discrete_avg b ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
   by_cases hN : N = 0
   · rw [hN]
     simp
@@ -5226,7 +5226,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
     simp [ha, hb]
   by_cases hι: IsEmpty ι
   · simp
-    unfold ergodic_avg nergodic_avg push_forward_many push_forward discrete_avg'
+    unfold ergodic_avg nergodic_avg push_forward_many push_forward discrete_avg
     simp
   simp at hι
   let p := (Fintype.card ι)
@@ -5254,7 +5254,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
       intro i
       specialize hS' i
       exact hS'.measurable
-  suffices : ∑ k ∈ (@bound_set ι N).toFinset, ∫⁻ (x : X), ‖ergodic_avg a S f x - ergodic_avg b S f x‖ₑ ^ 2 ∂μ ≤ ∫⁻ (x : X), ‖∑' k : ι → ℤ, (discrete_avg' a (push_forward_many N S f x) k - discrete_avg' b (push_forward_many N S f x) k) ^ 2‖ₑ ∂μ
+  suffices : ∑ k ∈ (@bound_set ι N).toFinset, ∫⁻ (x : X), ‖ergodic_avg a S f x - ergodic_avg b S f x‖ₑ ^ 2 ∂μ ≤ ∫⁻ (x : X), ‖∑' k : ι → ℤ, (discrete_avg a (push_forward_many N S f x) k - discrete_avg b (push_forward_many N S f x) k) ^ 2‖ₑ ∂μ
   · unfold p
     gcongr
   calc
@@ -5274,7 +5274,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
           rw [MeasureTheory.lintegral_finset_sum]
           intro k _
           fun_prop
-    _ = ∫⁻ (x : X), ∑ k ∈ (bound_set N).toFinset, ‖discrete_avg' a ((push_forward_many N S f) x) k - discrete_avg' b ((push_forward_many N S f) x) k‖ₑ ^ 2 ∂μ := by
+    _ = ∫⁻ (x : X), ∑ k ∈ (bound_set N).toFinset, ‖discrete_avg a ((push_forward_many N S f) x) k - discrete_avg b ((push_forward_many N S f) x) k‖ₑ ^ 2 ∂μ := by
           apply lintegral_congr
           intro k
           apply Finset.sum_congr rfl
@@ -5297,19 +5297,19 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
               gcongr
               tauto
             _ = 2 * (↑N : ℤ) := by ring
-    _ = ∫⁻ (x : X), ∑ k ∈ (bound_set N).toFinset, ‖(discrete_avg' a ((push_forward_many N S f) x) k - discrete_avg' b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
+    _ = ∫⁻ (x : X), ∑ k ∈ (bound_set N).toFinset, ‖(discrete_avg a ((push_forward_many N S f) x) k - discrete_avg b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
           apply lintegral_congr
           intro x
           apply Finset.sum_congr rfl
           intros
           rw [← @enorm_pow]
-    _ = ∫⁻ (x : X), ‖∑ k ∈ (bound_set N).toFinset, (discrete_avg' a ((push_forward_many N S f) x) k - discrete_avg' b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
+    _ = ∫⁻ (x : X), ‖∑ k ∈ (bound_set N).toFinset, (discrete_avg a ((push_forward_many N S f) x) k - discrete_avg b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
           apply lintegral_congr
           intro x
           rw [enorm_eq_ofReal_abs]
-          set h := fun k ↦ (discrete_avg' a (push_forward_many N S f x) k - discrete_avg' b (push_forward_many N S f x) k) ^ 2
-          have : ∑ k ∈ (bound_set N).toFinset, ‖(discrete_avg' a (push_forward_many N S f x) k
-              - discrete_avg' b (push_forward_many N S f x) k) ^ 2‖ₑ
+          set h := fun k ↦ (discrete_avg a (push_forward_many N S f x) k - discrete_avg b (push_forward_many N S f x) k) ^ 2
+          have : ∑ k ∈ (bound_set N).toFinset, ‖(discrete_avg a (push_forward_many N S f x) k
+              - discrete_avg b (push_forward_many N S f x) k) ^ 2‖ₑ
               = ∑ k ∈ (bound_set N).toFinset, ENNReal.ofReal |h k|:= by
             unfold h
             simp
@@ -5339,7 +5339,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
                 unfold h
                 intros
                 apply sq_nonneg
-    _ ≤ ∫⁻ (x : X), ‖∑ k ∈ (icoset ι (- (↑N : ℤ)) (2*(↑N : ℤ))).toFinset, (discrete_avg' a ((push_forward_many N S f) x) k - discrete_avg' b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
+    _ ≤ ∫⁻ (x : X), ‖∑ k ∈ (icoset ι (- (↑N : ℤ)) (2*(↑N : ℤ))).toFinset, (discrete_avg a ((push_forward_many N S f) x) k - discrete_avg b ((push_forward_many N S f) x) k)^2‖ₑ ∂μ := by
           apply lintegral_mono
           intro x
           simp
@@ -5347,9 +5347,9 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
           simp
           refine le_abs.mpr ?_
           left
-          suffices : |∑ k ∈ (bound_set N).toFinset, (discrete_avg' a (push_forward_many N S f x) k
-            - discrete_avg' b (push_forward_many N S f x) k) ^ 2| = ∑ k ∈ (bound_set N).toFinset,
-            (discrete_avg' a (push_forward_many N S f x) k - discrete_avg' b (push_forward_many N S f x) k) ^ 2
+          suffices : |∑ k ∈ (bound_set N).toFinset, (discrete_avg a (push_forward_many N S f x) k
+            - discrete_avg b (push_forward_many N S f x) k) ^ 2| = ∑ k ∈ (bound_set N).toFinset,
+            (discrete_avg a (push_forward_many N S f x) k - discrete_avg b (push_forward_many N S f x) k) ^ 2
           · rw [this]
             apply Finset.sum_le_sum_of_subset_of_nonneg
             · unfold bound_set
@@ -5365,7 +5365,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
           apply Finset.sum_nonneg
           intros
           apply sq_nonneg
-    _ = ∫⁻ (x : X), ‖∑' k : ι → ℤ, (discrete_avg' a (push_forward_many N S f x) k - discrete_avg' b (push_forward_many N S f x) k) ^ 2‖ₑ ∂μ := by
+    _ = ∫⁻ (x : X), ‖∑' k : ι → ℤ, (discrete_avg a (push_forward_many N S f x) k - discrete_avg b (push_forward_many N S f x) k) ^ 2‖ₑ ∂μ := by
           apply lintegral_congr
           intro x
           congr 1
@@ -5375,7 +5375,7 @@ theorem fact5_6 (a b : ℕ) [MeasurableSpace X] (μ : Measure X) (hS : pairwise_
           unfold bound_set icoset at uh
           simp_all
           unfold push_forward_many push_forward
-          unfold discrete_avg'
+          unfold discrete_avg
           suffices : ∀ n : ℕ, n ≤ N → ∑ i ∈ Finset.range n, ∏ j : ι,
             ((fun j k ↦ (if ∀ (i : ι), k i < 2 * (↑N : ℤ) ∧ 0 ≤ k i then
             f j (iterate S (fun i ↦ (k i).toNat) x) else 0)) j (u + unit j (↑i : ℤ))) = 0
@@ -5531,7 +5531,7 @@ variable [Nonempty ι]
 
 theorem fact5_8 {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2) --look at corollary 4 again and check
   (m : ℕ) (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0) (F : ι → (ι → ℤ) → ℝ) (hF : ∀ (j : ι), Memℓp (F j) (((q j).toNNReal))):
-    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
+    ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2  ≤ --NOTe : ∑' does coercion to ℝ, at some point (Fact 5.4 or smth) note that this is summable
     (((256 * (Fintype.card ι)^3 * π ^2) / 3) + 2*(good_const hg)) * g m * ∑ (j : ι), (∑' a : ι → ℤ, |(F j a)| ^ (q j)) := by
       set h : ι → ℝ := fun j ↦ ∑' a : ι → ℤ, |(F j a)| ^ (q j)
       have : ∑ j, (∑' (a : ι → ℤ), |F j a| ^ (q j)) = ∑ j, h j := by unfold h; simp
@@ -5539,7 +5539,7 @@ theorem fact5_8 {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) (hq : (∀
       clear this
       set C := (((256 * (Fintype.card ι)^3 * π ^2) / 3) + 2*(good_const hg)) * g m
       calc
-        ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg' (idx i.succ) F a - discrete_avg' (idx ⟨i, get_rid i⟩) F a)^2  ≤
+        ∑ i : Fin m, ∑' a : ι → ℤ, (discrete_avg (idx i.succ) F a - discrete_avg (idx ⟨i, get_rid i⟩) F a)^2  ≤
           C * ∏ (j : ι), (h j)^(2/ (q j)) := discrete_ver' hg hq m idx mon hidx hidx' F hF
         _ ≤ C * ∑ (j : ι), h j := by
           apply mul_le_mul_of_nonneg_left
@@ -5630,7 +5630,7 @@ theorem goal' [h : Nonempty ι] {f : ι → X → ℝ} {g : ℕ → NNReal} {q :
         linarith
       calc
             ∑ i : Fin m, ∫⁻ (x : X), ‖(ergodic_avg (idx i.succ) S f x - ergodic_avg (idx ⟨i,get_rid i⟩) S f x)‖ₑ ^ 2 ∂μ
-        _ ≤ ∑ i : Fin m, 1 / N^(Fintype.card ι) * ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg' (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg' (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
+        _ ≤ ∑ i : Fin m, 1 / N^(Fintype.card ι) * ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
             apply Finset.sum_le_sum
             intro i _
             apply fact5_6
@@ -5638,23 +5638,23 @@ theorem goal' [h : Nonempty ι] {f : ι → X → ℝ} {g : ℕ → NNReal} {q :
             · exact hS
             · simp [hN]
             exact hf
-        _ = 1 / N^(Fintype.card ι) * ∑ i : Fin m, ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg' (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg' (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by rw [@Finset.mul_sum]
-        _ = 1 / N^(Fintype.card ι) * ∫⁻ (x : X), ∑ i : Fin m, ‖(∑' k : ι → ℤ, (discrete_avg' (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg' (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
+        _ = 1 / N^(Fintype.card ι) * ∑ i : Fin m, ∫⁻ (x : X), ‖(∑' k : ι → ℤ, (discrete_avg (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by rw [@Finset.mul_sum]
+        _ = 1 / N^(Fintype.card ι) * ∫⁻ (x : X), ∑ i : Fin m, ‖(∑' k : ι → ℤ, (discrete_avg (idx i.succ) ((push_forward_many N S f) x) k - discrete_avg (idx ⟨i,get_rid i⟩) ((push_forward_many N S f) x) k)^2)‖ₑ ∂μ := by
             rw [MeasureTheory.lintegral_finset_sum]
             intro b _
             let P := 2*(↑N : ℤ)
             let Q := - (↑(idx (⟨m, Nat.lt_add_one m⟩ : Fin (m + 1))) : ℤ)
             have : (fun x ↦ ‖∑' (k : ι → ℤ),
-          (discrete_avg' (idx b.succ) (push_forward_many N S f x) k -
-              discrete_avg' (idx ⟨↑b, get_rid b⟩) (push_forward_many N S f x) k) ^
-            2‖ₑ) = (fun x ↦ ‖∑ k ∈ icoset ι Q P, (discrete_avg' (idx b.succ) (push_forward_many N S f x) k -
-              discrete_avg' (idx ⟨↑b, get_rid b⟩) (push_forward_many N S f x) k) ^
+          (discrete_avg (idx b.succ) (push_forward_many N S f x) k -
+              discrete_avg (idx ⟨↑b, get_rid b⟩) (push_forward_many N S f x) k) ^
+            2‖ₑ) = (fun x ↦ ‖∑ k ∈ icoset ι Q P, (discrete_avg (idx b.succ) (push_forward_many N S f x) k -
+              discrete_avg (idx ⟨↑b, get_rid b⟩) (push_forward_many N S f x) k) ^
             2‖ₑ) := by
               ext x
               congr 1
               apply tsum_eq_sum
               intro k kh
-              unfold push_forward_many discrete_avg'
+              unfold push_forward_many discrete_avg
               suffices : ∀ (n : ℕ) (hn : n ≤ idx (⟨m, Nat.lt_add_one m⟩ : Fin (m + 1))), ∑ i ∈ Finset.range n, ∏ j, (fun j k ↦ push_forward N S (f j) x k) j (k + unit j (↑i : ℤ)) = 0
               · rw [this, this]
                 · simp
@@ -5698,7 +5698,7 @@ theorem goal' [h : Nonempty ι] {f : ι → X → ℝ} {g : ℕ → NNReal} {q :
             refine Measurable.pow_const ?_ 2
             apply Measurable.sub
             repeat
-              unfold discrete_avg'
+              unfold discrete_avg
               apply Measurable.const_mul
               apply Finset.measurable_sum
               intro k' hk'
@@ -5712,17 +5712,17 @@ theorem goal' [h : Nonempty ι] {f : ι → X → ℝ} {g : ℕ → NNReal} {q :
             gcongr
             unfold C
             rename_i x
-            have : ∑ i : Fin m, ‖∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^
-          2‖ₑ = ‖ ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2‖ₑ := by
+            have : ∑ i : Fin m, ‖∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^
+          2‖ₑ = ‖ ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2‖ₑ := by
               refine Eq.symm ((fun {x y} hx hy ↦ (toReal_eq_toReal_iff' hx hy).mp) ?_ ?_ ?_)
               all_goals simp
               rw [ENNReal.toReal_sum]
               simp
-              have : |∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2| = ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2 := by
+              have : |∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2| = ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2 := by
                 simp
                 apply Finset.sum_nonneg
                 intros
@@ -5831,9 +5831,9 @@ theorem goal' [h : Nonempty ι] {f : ι → X → ℝ} {g : ℕ → NNReal} {q :
               norm_num
             rw [this]
             clear this
-            have : |∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2| = ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg' (idx i.succ) (push_forward_many N S f x) k -
-            discrete_avg' (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2 := by
+            have : |∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2| = ∑ i : Fin m, ∑' (k : ι → ℤ), (discrete_avg (idx i.succ) (push_forward_many N S f x) k -
+            discrete_avg (idx ⟨↑i, get_rid i⟩) (push_forward_many N S f x) k) ^ 2 := by
                 simp
                 apply Finset.sum_nonneg
                 intros

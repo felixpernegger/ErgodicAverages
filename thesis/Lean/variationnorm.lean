@@ -1,8 +1,6 @@
 import Mathlib
 open Function Set
 noncomputable section
-set_option linter.style.commandStart false
-
 
 open scoped NNReal ENNReal Topology UniformConvergence
 open Set Filter
@@ -78,12 +76,12 @@ theorem lp_enorm_top : lp_enorm ∞ f = ⨆ a : α, f a := by
   unfold lp_enorm
   simp only [ENNReal.top_ne_zero, ↓reduceIte]
 
-theorem lp_enorm_ne_zero_ne_top (h : p ≠ 0) (h': p ≠ ∞):
+theorem lp_enorm_ne_zero_ne_top (h : p ≠ 0) (h' : p ≠ ∞):
     lp_enorm p f = (∑' x : α, (f x) ^ p.toReal) ^ (p.toReal)⁻¹ := by
   unfold lp_enorm
   simp only [↓reduceIte, h, h']
 
-theorem lp_enorm_ne_zero_ne_top_finitype [Fintype α] (h : p ≠ 0) (h': p ≠ ∞) :
+theorem lp_enorm_ne_zero_ne_top_finitype [Fintype α] (h : p ≠ 0) (h' : p ≠ ∞) :
     lp_enorm p f = (∑ x : α, (f x) ^ p.toReal) ^ (p.toReal)⁻¹ := by
   rw[lp_enorm_ne_zero_ne_top p f h h', tsum_fintype fun b ↦ f b ^ p.toReal]
 
@@ -174,7 +172,7 @@ theorem iSup_cont_ennreal
     sorry
   sorry
 
-theorem iSup_pow_ennreal {α : Type*} (f : α → ℝ≥0∞) (p : ℝ) (hp: 0 ≤ p):
+theorem iSup_pow_ennreal {α : Type*} (f : α → ℝ≥0∞) (p : ℝ) (hp : 0 ≤ p):
     (⨆ a : α, (f a)^p) = (⨆ a : α, (f a))^p := by
   apply iSup_cont_ennreal (g := fun x ↦ x^p)
   · exact ENNReal.continuous_rpow_const
@@ -301,7 +299,7 @@ lemma pair_fun_mem : ∀ i, (pair_fun I j j') i ∈ I := by
   unfold pair_fun
   by_cases hi : i = 0
   · simp only [Fin.isValue, ↓reduceIte, hi]
-    by_cases jj': j ≤ j'
+    by_cases jj' : j ≤ j'
     · simp_all only [Fin.isValue, Subtype.coe_le_coe, inf_of_le_left, Subtype.coe_prop]
     have :  min (↑j : J) (↑j' : J) = j' := by
       simp only [inf_eq_right]
@@ -310,7 +308,7 @@ lemma pair_fun_mem : ∀ i, (pair_fun I j j') i ∈ I := by
     rw[this]
     exact Subtype.coe_prop j'
   simp only [Fin.isValue, hi, ↓reduceIte]
-  by_cases jj': j ≤ j'
+  by_cases jj' : j ≤ j'
   · have :  max (↑j : J) (↑j' : J) = j' := by
       simp_all only [Fin.isValue, Subtype.coe_le_coe, sup_of_le_right]
     rw[this]
@@ -499,7 +497,7 @@ lemma ENNReal_sup_lt_infty
   simp_all only [not_false_eq_true, Decidable.not_not, lt_self_iff_false]
 
 theorem eVariationOn_pow_r_lt_infty (h : r ≠ 0) (h' : r ≠ ∞)
-    (hv : r_eVariationOn r I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI: I.Nonempty):
+    (hv : r_eVariationOn r I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI : I.Nonempty):
     ∃ p : ℕ × { u : ℕ → J // Monotone u ∧ ∀ i, u i ∈ I }, (r_eVariationOn r I a)^r.toReal <
     (∑ i ∈ Finset.range p.1,
     edist (a (p.2.1 (i + 1))) (a (p.2.1 i))^r.toReal) + ε := by
@@ -516,7 +514,7 @@ theorem eVariationOn_pow_r_lt_infty (h : r ≠ 0) (h' : r ≠ ∞)
 
 
 theorem eVariationOn_lt_infty (h : r ≠ 0) (h' : r ≠ ∞)
-    (hv : r_eVariationOn r I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI: I.Nonempty):
+    (hv : r_eVariationOn r I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI : I.Nonempty):
     ∃ p : ℕ × { u : ℕ → J // Monotone u ∧ ∀ i, u i ∈ I }, r_eVariationOn r I a <
     (∑ i ∈ Finset.range p.1,
     edist (a (p.2.1 (i + 1))) (a (p.2.1 i))^r.toReal)^(r.toReal⁻¹) + ε := by
@@ -527,7 +525,7 @@ theorem eVariationOn_lt_infty (h : r ≠ 0) (h' : r ≠ ∞)
   exact (ENNReal_sup_lt_infty (h := hv) (hε := hε))
 
 theorem eVariationOn_infty_lt_infty
-    (hv : r_eVariationOn ∞ I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI: I.Nonempty):
+    (hv : r_eVariationOn ∞ I a ≠ ∞) {ε : NNReal} (hε : 0 < ε) (hI : I.Nonempty):
     ∃ j : I × I, r_eVariationOn ∞ I a <
     edist (a j.1) (a j.2) + ε := by
   rw [@infty_eVariationOn_eq_sup_edist] at *
@@ -622,7 +620,7 @@ theorem comb'_sum (p : ℕ × { u // Monotone u ∧ ∀ (i : ℕ), u i ∈ I })
 
 
 theorem r_eVariationOn_superadditivity
-    (h : r ≠ 0) (h' : r ≠ ∞) (II': ∀ i ∈ I, ∀ i' ∈ I', i ≤ i') :
+    (h : r ≠ 0) (h' : r ≠ ∞) (II' : ∀ i ∈ I, ∀ i' ∈ I', i ≤ i') :
     (r_eVariationOn r I a)^r.toReal + (r_eVariationOn r I' a)^r.toReal
     ≤ (r_eVariationOn r (I ∪ I') a)^r.toReal := by
   apply ENNReal.le_of_forall_pos_le_add
@@ -631,7 +629,7 @@ theorem r_eVariationOn_superadditivity
     refine lt_of_le_of_lt ?_ inf
     refine r_eVariationOn_pow_r_mono I (I ∪ I') a r ?_
     exact subset_union_left
-  have infI': r_eVariationOn r I' a ^ r.toReal < ⊤ := by
+  have infI' : r_eVariationOn r I' a ^ r.toReal < ⊤ := by
     refine lt_of_le_of_lt ?_ inf
     refine r_eVariationOn_pow_r_mono I' (I ∪ I') a r ?_
     exact subset_union_right
@@ -642,7 +640,7 @@ theorem r_eVariationOn_superadditivity
   swap
   · rw[Set.not_nonempty_iff_eq_empty.1 hI]
     simp only [r_eVariationOn_emptyset, empty_union, pz, zero_add, self_le_add_right]
-  by_cases hI':  I'.Nonempty
+  by_cases hI' :  I'.Nonempty
   swap
   · rw[Set.not_nonempty_iff_eq_empty.1 hI']
     simp only [r_eVariationOn_emptyset, union_empty, pz, add_zero, self_le_add_right]
@@ -658,7 +656,7 @@ theorem r_eVariationOn_superadditivity
     simp only [hε, div_pos_iff_of_pos_left, Nat.ofNat_pos]
   obtain ⟨p, ph⟩ := eVariationOn_pow_r_lt_infty I a r h h' h'I h'ε hI
   obtain ⟨p', p'h⟩ := eVariationOn_pow_r_lt_infty I' a r h h' h'I' h'ε hI'
-  have pp': p.2.1 p.1 ≤ p'.2.1 0 := by
+  have pp' : p.2.1 p.1 ≤ p'.2.1 0 := by
     apply II'
     · exact p.2.2.2 p.1
     exact p'.2.2.2 0
@@ -781,7 +779,7 @@ theorem r_eVariationOn_infty_infty_inv (hL : ∀ L : ℝ≥0∞, ∃ j : ↑I ×
   apply le_trans hp
   exact pair_le_eVariationOn_infty I a p
 
-theorem r_eVariationOn_on_mono_lt_infty  (hr : r ≠ 0) (hr' : r' ≠ ∞) (rr': r ≤ r'):
+theorem r_eVariationOn_on_mono_lt_infty (hr : r ≠ 0) (hr' : r' ≠ ∞) (rr' : r ≤ r'):
     r_eVariationOn r' I a ≤ r_eVariationOn r I a := by
   have h'r : r ≠ ∞ := by
     contrapose hr'
@@ -796,7 +794,7 @@ theorem r_eVariationOn_on_mono_lt_infty  (hr : r ≠ 0) (hr' : r' ≠ ∞) (rr':
     simp only [r_eVariationOn_emptyset, le_refl]
   refine ENNReal.le_of_forall_pos_le_add ?_
   intro ε hε fin
-  have fin': r_eVariationOn r' I a ≠ ⊤ := by
+  have fin' : r_eVariationOn r' I a ≠ ⊤ := by
     contrapose fin
     simp_all only [ne_eq, Decidable.not_not, not_lt, top_le_iff]
     apply eVariationOn_infty''_inv
@@ -829,7 +827,7 @@ theorem r_eVariationOn_on_mono_lt_infty  (hr : r ≠ 0) (hr' : r' ≠ ∞) (rr':
     _ ≤ r_eVariationOn r I a := by
       exact sum_le_eVariationOn' I a r p hr h'r
 
-lemma edist_eq_pair_fun_lp (j j' : ↑I) (h: r ≠ 0) (h': r ≠ ∞):
+lemma edist_eq_pair_fun_lp (j j' : ↑I) (h : r ≠ 0) (h' : r ≠ ∞):
     edist (a ↑j) (a ↑j') = (∑ i ∈ Finset.range (pair_fun' I j j').1,
     edist (a ((↑(pair_fun' I j j').2 : ℕ → J)
     (i + 1))) (a ((↑(pair_fun' I j j').2 : ℕ → J) i)) ^ r.toReal)^r.toReal⁻¹ := by
@@ -842,7 +840,7 @@ lemma edist_eq_pair_fun_lp (j j' : ↑I) (h: r ≠ 0) (h': r ≠ ∞):
     ENNReal.zero_rpow_of_pos, Finset.range_one, Finset.sum_singleton, Nat.ofNat_pos, zero_add]
   rw [← ENNReal.rpow_mul]
   field_simp
-  by_cases jj': ↑j ≤ ↑j'
+  by_cases jj' : ↑j ≤ ↑j'
   · simp only [Subtype.coe_le_coe, jj', sup_of_le_right, inf_of_le_left]
     rw [@WeakPseudoEMetricSpace.edist_comm]
   simp_all only [ne_eq, not_le, Subtype.coe_lt_coe, le_of_lt, sup_of_le_left, inf_of_le_right]
@@ -857,7 +855,7 @@ theorem infty_variation_le_r_eVariation (hr : r ≠ 0) :
     simp only [r_eVariationOn_emptyset, le_refl]
   refine ENNReal.le_of_forall_pos_le_add ?_
   intro ε hε fin
-  have fin': r_eVariationOn ⊤ I a ≠ ⊤ := by
+  have fin' : r_eVariationOn ⊤ I a ≠ ⊤ := by
     contrapose fin
     simp_all only [ne_eq, Decidable.not_not, not_lt, top_le_iff]
     apply eVariationOn_infty''_inv

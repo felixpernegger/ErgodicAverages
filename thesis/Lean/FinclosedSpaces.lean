@@ -761,12 +761,13 @@ theorem preimage_bounded {S : FinclosedSpace} {t : ℝ} {f : S.X → NNReal} (ht
             set l := (↑l : ℝ) ^ (-1 / (1 - t))
             rw [mul_assoc, ← mul_assoc ((↑k :ℝ) ^ (1 - (1 - t)⁻¹)), mul_comm ((↑k :ℝ)^ (1 - (1 - t)⁻¹)), mul_assoc]
             rw [← Real.rpow_add]
-            field_simp
-            rw [mul_comm]
+            · field_simp
+              simp_all
+              rw [mul_comm]
             all_goals try simp_all
-            apply Real.rpow_nonneg dnonneg
-            apply mul_nonneg Cnonneg
-            apply Real.rpow_nonneg dnonneg
+            · apply Real.rpow_nonneg dnonneg
+            · apply mul_nonneg Cnonneg
+              apply Real.rpow_nonneg dnonneg
             apply Real.rpow_nonneg
             simp_all
     have fin : Set.Finite ((↑s : Set S.X) ∩ f ⁻¹' Ioi l) := by
@@ -802,23 +803,19 @@ theorem preimage_bounded {S : FinclosedSpace} {t : ℝ} {f : S.X → NNReal} (ht
         · unfold C
           exact (Exists.choose_spec (fun_closed_nonneg hf)).2
         apply Real.rpow_le_rpow
-        simp only [Nat.cast_nonneg]
-        unfold d k at *
-        apply le_trans (closure_closurefactor semclosed)
-        suffices : (↑s ∩ f ⁻¹' Ioi l).toFinset.card = (↑s ∩ f ⁻¹' Ioi l).ncard
-        · rw [this]
-        exact Eq.symm (ncard_eq_toFinset_card' (↑s ∩ f ⁻¹' Ioi l))
+        · simp only [Nat.cast_nonneg]
+        · unfold d k at *
+          apply le_trans (closure_closurefactor semclosed)
+          · suffices : (↑s ∩ f ⁻¹' Ioi l).toFinset.card = (↑s ∩ f ⁻¹' Ioi l).ncard
+            · rw [this]
+            exact Eq.symm (ncard_eq_toFinset_card' (↑s ∩ f ⁻¹' Ioi l))
         exact ht'
 
 instance nnatt.instMeasurableSpace : MeasurableSpace ℕ := ⊤
 
-
-
---lemma int_lemma {f : ℝ → ℝ} {A B : Set ℝ}: ∫ x in A, (0:ℝ) = 0 := by sorry
-
 lemma int_lemma {f g : ℝ → ℝ} {A : Set ℝ} (hA : MeasurableSet A) (hg : MeasureTheory.IntegrableOn g A) (mon : ∀ x ∈ A, f x ≤ g x) (fnonneg : ∀ x ∈ A, 0 ≤ f x): ∫ x in A, f x ≤ ∫ x in A, g x := by
   by_cases hf : MeasureTheory.IntegrableOn f A
-  exact MeasureTheory.setIntegral_mono_on hf hg hA mon
+  · exact MeasureTheory.setIntegral_mono_on hf hg hA mon
   rw [MeasureTheory.integral_undef hf]
   apply MeasureTheory.setIntegral_nonneg hA
   intro x xh
@@ -954,30 +951,30 @@ lemma finint_rpow (L t: ℝ) (ht : -1 < t): ∫⁻ (a : ℝ) in Ioc 0 L, ‖a ^ 
     rw [h0]
     rfl
   rw [← MeasureTheory.integral_eq_lintegral_of_nonneg_ae] at p0
-  suffices : ∫ (a : ℝ), (Ioc 0 L).indicator (fun a ↦ a ^ t) a = (1+t)⁻¹ *L^(1+t)
-  · rw [this] at p0
-    simp only [mul_eq_zero, inv_eq_zero, not_le] at p0 hL
-    obtain p0|p0 := p0
-    · linarith
-    have := (Real.rpow_eq_zero (x := L) (y := 1+t) (le_of_lt hL) (by linarith)).1 p0
-    linarith
-  calc
-    ∫ (a : ℝ), (Ioc 0 L).indicator (fun a ↦ a ^ t) a = ∫ (a : ℝ) in (Ioc 0 L), (fun a ↦ a ^ t) a := by
-      refine MeasureTheory.integral_indicator ?_
-      measurability
-        _ = ∫ (a : ℝ) in (Ioc 0 L), a ^ t := rfl
-        _ = ∫ (a : ℝ) in (0 : ℝ)..L, a ^ t := by
-          refine Eq.symm (intervalIntegral.integral_of_le ?_)
-          linarith
-        _ = (L ^ (t + 1) - 0 ^ (t + 1)) / (t + 1) := by
-          rw [integral_rpow]
-          left
-          exact ht
-        _= (1 + t)⁻¹ * L ^ (1 + t) := by
-          have t0: t + 1 ≠ 0 := by linarith
-          rw [add_comm 1]
-          simp only [ne_eq, t0, not_false_eq_true, Real.zero_rpow, sub_zero]
-          exact div_eq_inv_mul (L ^ (t + 1)) (t + 1)
+  · suffices : ∫ (a : ℝ), (Ioc 0 L).indicator (fun a ↦ a ^ t) a = (1+t)⁻¹ *L^(1+t)
+    · rw [this] at p0
+      simp only [mul_eq_zero, inv_eq_zero, not_le] at p0 hL
+      obtain p0|p0 := p0
+      · linarith
+      have := (Real.rpow_eq_zero (x := L) (y := 1+t) (le_of_lt hL) (by linarith)).1 p0
+      linarith
+    calc
+      ∫ (a : ℝ), (Ioc 0 L).indicator (fun a ↦ a ^ t) a = ∫ (a : ℝ) in (Ioc 0 L), (fun a ↦ a ^ t) a := by
+        refine MeasureTheory.integral_indicator ?_
+        measurability
+          _ = ∫ (a : ℝ) in (Ioc 0 L), a ^ t := rfl
+          _ = ∫ (a : ℝ) in (0 : ℝ)..L, a ^ t := by
+            refine Eq.symm (intervalIntegral.integral_of_le ?_)
+            linarith
+          _ = (L ^ (t + 1) - 0 ^ (t + 1)) / (t + 1) := by
+            rw [integral_rpow]
+            left
+            exact ht
+          _= (1 + t)⁻¹ * L ^ (1 + t) := by
+            have t0: t + 1 ≠ 0 := by linarith
+            rw [add_comm 1]
+            simp only [ne_eq, t0, not_false_eq_true, Real.zero_rpow, sub_zero]
+            exact div_eq_inv_mul (L ^ (t + 1)) (t + 1)
   · unfold Filter.EventuallyLE
     apply MeasureTheory.ae_of_all
     intro a
@@ -1530,28 +1527,28 @@ theorem layercake_overkill
       _= ∑' x : U, (g x) ^ r := by rw [← @Finset.tsum_subtype]
       _= r * ∫ (s : ℝ) in Ioi 0, s ^ (r - 1) * ↑((fun x ↦ g (↑x : U)) ⁻¹' (Ioi s ∪ Iio (-s))).ncard := by
         rw [layercake_sum]
-        exact Finite.of_fintype { x // x ∈ U }
-        unfold g
-        intro x
-        simp only [Pi.zero_apply, NNReal.abs_eq, NNReal.zero_le_coe]
+        · exact Finite.of_fintype { x // x ∈ U }
+        · unfold g
+          intro x
+          simp only [Pi.zero_apply, NNReal.abs_eq, NNReal.zero_le_coe]
         linarith
       _≤ r * ∫ (s : ℝ) in Ioi 0, s ^ (r - 1) * ↑(↑U ∩ g⁻¹' (Ioi s ∪ Iio (-s))).ncard := by
         --unfold g
         refine mul_le_mul_of_nonneg ?_ ?_ ?_ ?_
-        simp only [le_refl]
+        · simp only [le_refl]
         swap
-        linarith
+        · linarith
         swap
-        refine MeasureTheory.setIntegral_nonneg ?_ ?_
-        intros
-        simp only [measurableSet_Ioi]
-        intros
-        simp only [preimage_union]
-        apply mul_nonneg
-        refine Real.rpow_nonneg ?_ (r - 1)
-        apply le_of_lt
-        assumption
-        simp only [Nat.cast_nonneg]
+        · refine MeasureTheory.setIntegral_nonneg ?_ ?_
+          · intros
+            simp only [measurableSet_Ioi]
+          intros
+          simp only [preimage_union]
+          apply mul_nonneg
+          · refine Real.rpow_nonneg ?_ (r - 1)
+            apply le_of_lt
+            assumption
+          simp only [Nat.cast_nonneg]
         apply int_lemma
         · measurability
         · have : (fun (x : ℝ) ↦ x ^ (r - 1) * ↑((↑U : Set S.X) ∩ g ⁻¹' (Ioi x ∪ Iio (-x))).ncard) = (Iic L).indicator (fun (x : ℝ) ↦ x ^ (r - 1) * ↑((↑U  : Set S.X) ∩ g ⁻¹' (Ioi x ∪ Iio (-x))).ncard) := by
@@ -1630,31 +1627,28 @@ theorem layercake_overkill
                 refine finint_rpow L (r - 1) ?_
                 linarith
           --apply aestronglymeasurable_zero_set
-        simp
-        intro x xh
-        set B := ↑U ∩ ((fun x ↦ g ↑x) ⁻¹' Ioi x ∪ (fun x ↦ g ↑x) ⁻¹' Iio (-x))
-        set A := (fun (x : U) ↦ g ↑x) ⁻¹' Ioi x ∪ (fun (x : U) ↦ g (↑x : (S.X))) ⁻¹' Iio (-x)
-        suffices : B = scoe A
-        · rw [this, scoe_ncard]
-        swap
+        · simp
+          intro x xh
+          set B := ↑U ∩ ((fun x ↦ g ↑x) ⁻¹' Ioi x ∪ (fun x ↦ g ↑x) ⁻¹' Iio (-x))
+          set A := (fun (x : U) ↦ g ↑x) ⁻¹' Ioi x ∪ (fun (x : U) ↦ g (↑x : (S.X))) ⁻¹' Iio (-x)
+          suffices : B = scoe A
+          · rw [this, scoe_ncard]
+          unfold scoe A B
+          ext t
+          constructor
+          · intro th
+            use ⟨t, th.1⟩
+            simp
+            simp at th
+            tauto
+          intro th
+          simp_all
         intro x xh
         unfold Ioi at xh
         apply mul_nonneg
         all_goals simp_all
         refine Real.rpow_nonneg ?_ (r-1)
         linarith
-
-        unfold scoe A B
-        ext t
-        constructor
-        · intro th
-          use ⟨t, th.1⟩
-          simp
-          simp at th
-          tauto
-        intro th
-        simp_all
-
       _= r * ∫ (s : ℝ) in Ioc 0 L, s ^ (r - 1) * ↑(↑U ∩ g⁻¹' (Ioi s ∪ Iio (-s))).ncard := by
         simp
         left
@@ -1760,7 +1754,7 @@ theorem layercake_overkill
         simp
         left
         apply MeasureTheory.setIntegral_congr_fun
-        simp
+        · simp
         unfold EqOn
         intro x xh
         simp
@@ -1783,11 +1777,11 @@ theorem layercake_overkill
         · rfl
         swap
         · refine MeasureTheory.setIntegral_nonneg ?_ ?_
-          simp only [measurableSet_Ioc]
+          · simp only [measurableSet_Ioc]
           intro x xh
           apply mul_nonneg
-          refine Real.rpow_nonneg ?_ (r - 1)
-          exact le_of_lt xh.1
+          · refine Real.rpow_nonneg ?_ (r - 1)
+            exact le_of_lt xh.1
           simp only [Nat.cast_nonneg]
         swap
         · linarith
@@ -1819,74 +1813,74 @@ theorem layercake_overkill
           · exact enorm_lt_top
           apply finint_rpow
           simp_all
-        intro s sh
-        suffices : ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s^(-(1-b)⁻¹)
-        · calc
-             s^(r-1) * ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ s^(r-1) * (C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (-(1 - b)⁻¹)) := by
-              apply mul_le_mul
-              · rfl
-              · exact this
-              · simp only [Nat.cast_nonneg]
-              · refine Real.rpow_nonneg ?_ (r - 1)
-                unfold Ioc at sh
-                rw [mem_setOf_eq] at sh
-                linarith
-            _= C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (r - 1 - (1 - b)⁻¹) := by
-                rw [← mul_assoc, mul_comm, ← mul_assoc, mul_comm]
-                rw [← Real.rpow_add, add_comm]
-                simp
-                left
-                rw [@Mathlib.Tactic.RingNF.add_neg]
-                unfold Ioc at sh
-                simp at sh
-                exact sh.1
+        · intro s sh
+          suffices : ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s^(-(1-b)⁻¹)
+          · calc
+              s^(r-1) * ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ s^(r-1) * (C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (-(1 - b)⁻¹)) := by
+                apply mul_le_mul
+                · rfl
+                · exact this
+                · simp only [Nat.cast_nonneg]
+                · refine Real.rpow_nonneg ?_ (r - 1)
+                  unfold Ioc at sh
+                  rw [mem_setOf_eq] at sh
+                  linarith
+              _= C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (r - 1 - (1 - b)⁻¹) := by
+                  rw [← mul_assoc, mul_comm, ← mul_assoc, mul_comm]
+                  rw [← Real.rpow_add, add_comm]
+                  · simp
+                    left
+                    rw [@Mathlib.Tactic.RingNF.add_neg]
+                  unfold Ioc at sh
+                  simp at sh
+                  exact sh.1
 
-        calc
-          ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ fun_closed_const hf ^ (1 - b)⁻¹ * ClosureFactor S ^ (b / (1 - b)) * ↑s.toNNReal ^ (-(1 - b)⁻¹) := by
-            have spos : 0 < s := by
-              unfold Ioc at sh
+          calc
+            ↑(↑U ∩ g ⁻¹' Ioi s).ncard ≤ fun_closed_const hf ^ (1 - b)⁻¹ * ClosureFactor S ^ (b / (1 - b)) * ↑s.toNNReal ^ (-(1 - b)⁻¹) := by
+              have spos : 0 < s := by
+                unfold Ioc at sh
+                simp_all
+              have : 0 < s.toNNReal := by simp_all
+              --suffices : ↑U ∩ g ⁻¹' Ioi s = ↑U ∩ f
+              have := @preimage_bounded S b f hb hb2 hf U Uh s.toNNReal this
+              set A := (↑U ∩ f ⁻¹' Ioi s.toNNReal)
+              set B := ↑U ∩ g ⁻¹' Ioi s
+              suffices g : A = B
+              · rw [← g]
+                assumption
+              unfold A B
+              ext t
+              unfold g
+              constructor
+              · intro th
+                simp_all
+                suffices : ↑(s.toNNReal) = s
+                · rw [← this]
+                  tauto
+                simp
+                linarith
+
+              intro th
               simp_all
-            have : 0 < s.toNNReal := by simp_all
-            --suffices : ↑U ∩ g ⁻¹' Ioi s = ↑U ∩ f
-            have := @preimage_bounded S b f hb hb2 hf U Uh s.toNNReal this
-            set A := (↑U ∩ f ⁻¹' Ioi s.toNNReal)
-            set B := ↑U ∩ g ⁻¹' Ioi s
-            suffices g : A = B
-            · rw [← g]
-              assumption
-            unfold A B
-            ext t
-            unfold g
-            constructor
-            · intro th
-              simp_all
+              suffices : (↑(s.toNNReal) : ℝ) < ↑(f t)
+              · exact this
               suffices : ↑(s.toNNReal) = s
-              · rw [← this]
+              · rw [this]
                 tauto
               simp
               linarith
 
-            intro th
-            simp_all
-            suffices : (↑(s.toNNReal) : ℝ) < ↑(f t)
-            · exact this
-            suffices : ↑(s.toNNReal) = s
-            · rw [this]
-              tauto
-            simp
-            linarith
-
-          _ = C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (-(1 - b)⁻¹) := by
-            unfold C k
-            have : max s 0 = s := by unfold Ioc at sh; simp_all; linarith
-            simp
-            rw [this]
-            simp
+            _ = C ^ (1 - b)⁻¹ * k ^ (b / (1 - b)) * s ^ (-(1 - b)⁻¹) := by
+              unfold C k
+              have : max s 0 = s := by unfold Ioc at sh; simp_all; linarith
+              simp
+              rw [this]
+              simp
         simp
         intro x xp xL
         apply mul_nonneg
-        refine Real.rpow_nonneg ?_ (r - 1)
-        linarith
+        · refine Real.rpow_nonneg ?_ (r - 1)
+          linarith
         simp only [Nat.cast_nonneg]
       _= r *  ( C ^ (1 - b)⁻¹ * k ^ (b / (1 - b))) * ∫ (s : ℝ) in Ioc 0 L, (s ^ (r - 1 - (1 - b)⁻¹)) := by
         rw [mul_assoc r]
