@@ -7,14 +7,6 @@ set_option linter.style.commandStart false
 open scoped NNReal ENNReal Topology UniformConvergence
 open Set Filter
 
-/-
-class PseudoEMetricSpace (α : Type u) : Type u extends EDist α  where
-  edist_self : ∀ x : α, edist x x = 0
-  edist_comm : ∀ x y : α, edist x y = edist y x
-  edist_triangle : ∀ x y z : α, edist x z ≤ edist x y + edist y z
-  toUniformSpace : UniformSpace α := uniformSpaceOfEDist edist edist_self edist_comm edist_triangle
-  uniformity_edist : 𝓤 α = ⨅ ε > 0, 𝓟 { p : α × α | edist p.1 p.2 < ε } := by rfl
--/
 universe u
 
 class WeakPseudoEMetricSpace (α : Type u) : Type u extends EDist α where
@@ -99,17 +91,11 @@ end lp_enorm
 
 variable {J : Type*} {B : Type*}
   [LinearOrder J] [WeakPseudoEMetricSpace B] (I I' : Set J) (a : J → B) (r r' : ℝ≥0∞)
-/-
-noncomputable def eVariationOn (f : α → E) (s : Set α) : ℝ≥0∞ :=
-  ⨆ p : ℕ × { u : ℕ → α // Monotone u ∧ ∀ i, u i ∈ s },
-    ∑ i ∈ Finset.range p.1, edist (f (p.2.1 (i + 1))) (f (p.2.1 i))-/
 
 def r_eVariationOn
     (r : ℝ≥0∞) {J B : Type*} [LinearOrder J] [WeakPseudoEMetricSpace B] (I : Set J) (a : J → B):
       ℝ≥0∞ :=
   ⨆ p : ℕ  × { t : ℕ → J // Monotone t ∧ ∀ i, t i ∈ I}, lp_enorm r (diff_fun p.1 p.2.1 a)
-
-#check r_eVariationOn
 
 
 instance eVartionOnTypeInhabited (h : I.Nonempty):
@@ -158,13 +144,10 @@ theorem r_eVariationOn_ne_zero_ne_top (h : r ≠ 0) (h' : r ≠ ∞):
   simp only [Finset.mem_range] at xh
   simp only [xh, ↓reduceDIte]
 
-/-So r=1 gives us exactly the eVariation-/
-
 theorem r_eVariationOn_one_eq_eVariationOn {B : Type*} [PseudoEMetricSpace B] (a : J → B) :
     r_eVariationOn 1 I a = eVariationOn a I := by
   simp only [ne_eq, one_ne_zero, not_false_eq_true, ENNReal.one_ne_top,
     r_eVariationOn_ne_zero_ne_top, ENNReal.toReal_one, ENNReal.rpow_one, inv_one, eVariationOn]
-#check ENNReal.le_of_forall_pos_le_add
 
 theorem iSup_cont_ennreal'
     (s : Set ℝ≥0∞) (g : ℝ≥0∞ → ℝ≥0∞) (h : Continuous g) (h' : Monotone g):
@@ -752,7 +735,7 @@ lemma summand_le_fin_sum_lp
         gcongr
         exact summand_le_fin_sum ha fun x ↦ f x ^ p
 
-#check eVariationOn_infty'
+
 
 theorem eVariationOn_infty'_inv (h : r ≠ 0) (h' : r ≠ ∞)
     (hL : ∀ L : ℝ≥0, ∃ p : ℕ × { u : ℕ → J // Monotone u ∧ ∀ i, u i ∈ I },
@@ -907,6 +890,3 @@ def zero_add_one : Nat := by exact Nat.add 0 1
 example : zero_add_one = 1 := by
   unfold zero_add_one
   exact zero_add 1
-
-#check Nat.add
-#min_imports
