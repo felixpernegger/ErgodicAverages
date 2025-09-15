@@ -754,7 +754,7 @@ theorem preimage_bounded {S : FinclosedSpace} {t : ℝ} {f : S.X → NNReal} (ht
             rw [← mul_assoc, mul_comm ((↑k : ℝ) ^ (1 - 1 / (1 - t))), ← mul_assoc ((↑l : ℝ) ^ (-1))]
             rw [← Real.rpow_add]
             swap
-            exact hl
+            · exact hl
             simp only [one_div]
             have : -1 + (1 - (1 - t)⁻¹) = -1 / (1-t) := by field_simp; ring
             rw [this]

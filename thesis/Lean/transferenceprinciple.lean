@@ -6240,15 +6240,18 @@ theorem goal
 /-The same theorem with the constant stated implicitly :-/
 
 theorem og_goal
-    {ι X : Type*} [Fintype ι] [Nonempty ι] [MeasurableSpace X] {μ : Measure X}
-    {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q) {f : ι → X → ℝ} {S : ι → X → X}
-    (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2)
+    {ι : Type*} [Fintype ι] [Nonempty ι]
+    {g : ℕ → NNReal} {q : ι → ℝ} (hg : good g q)
+    (hq : (∀ (i : ι), 0 < q i) ∧ ∑ (i : ι), 1 / (q i) = 1 / 2):
+    ∃ C : NNReal, ∀ {X : Type*} [MeasurableSpace X] {μ : Measure X}
+    {f : ι → X → ℝ} {S : ι → X → X}
     (m : ℕ) (idx : Fin (m + 1) → ℕ) (mon : Monotone idx) (hidx : Injective idx) (hidx' : 0 < idx 0)
-    (hS : MMeasurePreserving μ S) (hS' : pairwise_commuting S) (hf : ∀ (i : ι), Measurable (f i)):
-    ∃ C : NNReal, ∑ i : Fin m, ∫⁻ (x : X),
+    (hS : MMeasurePreserving μ S) (hS' : pairwise_commuting S) (hf : ∀ (i : ι), Measurable (f i)),
+    ∑ i : Fin m, ∫⁻ (x : X),
     ‖(ergodic_avg (idx i.succ) S f x - ergodic_avg (idx ⟨i,get_rid i⟩) S f x)‖ₑ ^ 2 ∂μ ≤
     C * g m * ∏(i : ι), (∫⁻ (x : X), ‖f i x‖ₑ^(q i) ∂μ)^(2/ (q i)) := by
   use (Fintype.card ι) * 2 ^(Fintype.card ι) * (((256 * (Fintype.card ι) ^ 3 * π ^ 2) / 3).toNNReal + 2 * (good_const hg))
+  intro X _ μ f S m idx mon hidx hidx' hS hS' hf
   exact goal f hg μ hq m idx mon hidx hidx' hS hS' hf
 
 end Calderon
