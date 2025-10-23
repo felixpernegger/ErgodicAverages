@@ -148,41 +148,65 @@ theorem r_eVariationOn_one_eq_eVariationOn {B : Type*} [PseudoEMetricSpace B] (a
     r_eVariationOn_ne_zero_ne_top, ENNReal.toReal_one, ENNReal.rpow_one, inv_one, eVariationOn]
 
 theorem iSup_cont_ennreal'
-    (s : Set ℝ≥0∞) (g : ℝ≥0∞ → ℝ≥0∞) (h : Continuous g) (h' : Monotone g):
-    ⨆ a ∈ s, g a = g (⨆ a ∈ s, a) := by
-  sorry
+    {s : Set ℝ≥0∞} (hs : s.Nonempty)
+    (f : ℝ≥0∞ → ℝ≥0∞) (h : ContinuousAt f (⨆ a ∈ s, a)) (h' : Monotone f):
+    ⨆ a ∈ s, f a = f (⨆ a ∈ s, a) := by
+  calc
+    ⨆ a ∈ s, f a
+      = sSup (f '' s) := by exact Eq.symm sSup_image
+    _ = f (sSup s) := by
+      rw[← Monotone.map_csSup_of_continuousAt]
+      · rw[sSup_eq_iSup]
+        exact h
+      · exact h'
+      exact hs
+    _ = f (⨆ a ∈ s, a) := by rw[sSup_eq_iSup]
 
 theorem iSup_cont_ennreal
-    {α : Type*} (f : α → ℝ≥0∞) (g : ℝ≥0∞ → ℝ≥0∞) (h : Continuous g) (h' : Monotone g):
-    (⨆ a : α, g (f a)) = g (⨆ a : α, (f a)) := by
-  apply le_antisymm
-  · exact Monotone.le_map_iSup h'
-  apply ENNReal.le_of_forall_pos_le_add
-  intro ε εp h
-  have : g (⨆ a, f a) < ⊤ := by
-    contrapose! h
-    simp_all only [top_le_iff]
-    refine ENNReal.eq_top_of_forall_nnreal_le ?_
-    intro r
-    contrapose h
-    simp_all only [not_le]
-    suffices: g (⨆ a, f a) ≤ r
-    · contrapose this
-      simp_all only [Decidable.not_not, top_le_iff, ENNReal.coe_ne_top, not_false_eq_true]
-    sorry
-  sorry
+    {α : Type*} (f : α → ℝ≥0∞) (g : ℝ≥0∞ → ℝ≥0∞)
+    (h : ContinuousAt g (⨆ a : α, (f a))) (h' : Monotone g) (hα : Nonempty α):
+    ⨆ a : α, g (f a) = g (⨆ a : α, (f a)) := by
+  have si: ⨆ a ∈ f '' univ, a = ⨆ a, f a := by
+    rw[iSup_image]
+    simp only [mem_univ, iSup_pos]
+  calc
+    ⨆ a : α, g (f a)
+      = ⨆ a ∈ f '' univ, g a := by
+        rw[← iSup_univ, ← iSup_image]
+    _ = g (⨆ a ∈ f '' univ, a) := by
+      rw[iSup_cont_ennreal']
+      · simp
+        exact range_nonempty f
+      · rwa [si]
+      exact h'
+    _ = g (⨆ a : α, f a) := by rw[si]
 
-theorem iSup_pow_ennreal {α : Type*} (f : α → ℝ≥0∞) (p : ℝ) (hp : 0 ≤ p):
+theorem iSup_pow_ennreal {α : Type*} (f : α → ℝ≥0∞) {p : ℝ} (hp : 0 ≤ p) (h : p ≠ 0 ∨ Nonempty α):
     (⨆ a : α, (f a)^p) = (⨆ a : α, (f a))^p := by
-  apply iSup_cont_ennreal (g := fun x ↦ x^p)
-  · exact ENNReal.continuous_rpow_const
-  exact ENNReal.monotone_rpow_of_nonneg hp
+  by_cases hα : Nonempty α
+  · apply iSup_cont_ennreal (g := fun x ↦ x^p)
+    · refine Continuous.continuousAt ?_
+      exact ENNReal.continuous_rpow_const
+    · exact ENNReal.monotone_rpow_of_nonneg hp
+    exact hα
+  simp_all only [ne_eq, or_false, not_nonempty_iff, ciSup_of_empty, bot_eq_zero']
+  rw [ENNReal.zero_rpow_def]
+  simp_all
+  contrapose h
+  simp_all
+  linarith
 
 theorem r_eVariationOn_ne_zero_ne_top' (h : r ≠ 0) (h' : r ≠ ∞):
     r_eVariationOn r I a = (⨆ p : ℕ × { u : ℕ → J // Monotone u ∧ ∀ i, u i ∈ I },
     (∑ i ∈ Finset.range p.1, edist (a (p.2.1 (i + 1))) (a (p.2.1 i))^r.toReal))^(r.toReal⁻¹) := by
   rw[r_eVariationOn_ne_zero_ne_top I a r h h', iSup_pow_ennreal]
-  simp only [inv_nonneg, ENNReal.toReal_nonneg]
+  · simp only [inv_nonneg, ENNReal.toReal_nonneg]
+  left
+  by_contra h0
+  simp at h0
+  have : r = 0 ∨ r = ⊤ := by
+    exact (ENNReal.toReal_eq_zero_iff r).mp h0
+  tauto
 
 theorem r_eVariationOn_pow_r_eq_sup (h : r ≠ 0) (h' : r ≠ ∞) :
     (r_eVariationOn r I a)^r.toReal = (⨆ p : ℕ × { u : ℕ → J // Monotone u ∧ ∀ i, u i ∈ I },
@@ -882,9 +906,3 @@ theorem r_eVariation_on_mono (hr : r ≠ 0) (h : r ≤ r') :
   exact r_eVariationOn_on_mono_lt_infty I a r r' hr h'r' h
 
 end VariationNorm
-
-def zero_add_one : Nat := by exact Nat.add 0 1
-
-example : zero_add_one = 1 := by
-  unfold zero_add_one
-  exact zero_add 1
